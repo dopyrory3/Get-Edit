@@ -18,9 +18,12 @@ $Script:Cursor = [PSCustomObject]@{
 
 function Save-Edit {
     [System.Console]::Clear()
-    Write-Host "Saving!..."
-    $Script:Buffer | Out-String -Stream | Out-File $Path -NoNewline -Force
-    Write-Host "Saved!"
+    try {
+        $Script:Buffer | Out-String -Stream | Out-File $Path -Force
+    }
+    catch {
+        return "Error! Could not save file"
+    }
 }
 
 function Open-Edit {
@@ -51,6 +54,10 @@ function Move-Cursor {
         [ValidateSet('Up', 'Down', 'Left', 'Right')]
         $direction
     )
+
+    # Firstly, resync the cursor variables to the console cursor, just in case we've lost track of where we are since the last update
+    $Script:Cursor.X = [System.Console]::CursorLeft
+    $Script:Cursor.Y = [System.Console]::CursorTop
     
     # Modify the cursor, ignore if we're going to break bounds
     switch ($direction) {
@@ -69,17 +76,44 @@ function Move-Cursor {
                     $Script:Cursor.X = $Script:Buffer[([System.Console]::CursorTop) + 1].Length
                 }
                 $Script:Cursor.Y = $Script:Cursor.Y + 1
-
             }
         }
         'Left' {
             if ($Script:Cursor.X -gt 0) {
-                $Script:Cursor.X = $Script:Cursor.X - 1
+                # Tab handling
+                if ($Script:Buffer[([System.Console]::CursorTop)][([System.Console]::CursorLeft)] -eq [System.ConsoleKey]::Tab) {
+                    $Script:Cursor.X = $Script:Cursor.X - 5
+                }
+                else {
+                    $Script:Cursor.X = $Script:Cursor.X - 1
+                }
+            }
+            else {
+                # EOL handling
+                if ($Script:Cursor.Y - 1 -gt 0) {
+                    $Script:Cursor.Y = $Script:Cursor.Y - 1
+                    $Script:Cursor.X = $Script:Buffer[$Script:Cursor.Y].Length
+                } 
             }
         }
         'Right' {
+            # Move to the next line if we've reached the line bounds, otherwise next cursor position
             if ([System.Console]::CursorLeft -lt $Script:Buffer[([System.Console]::CursorTop)].Length) {
-                $Script:Cursor.X = $Script:Cursor.X + 1
+                # TAB handling
+                if ($Script:Buffer[([System.Console]::CursorTop)][([System.Console]::CursorLeft)] -eq [System.ConsoleKey]::Tab) {
+                    $Script:Cursor.X = $Script:Cursor.X + 5
+                    Sync-Console -CursorOnly
+                }
+                else {
+                    $Script:Cursor.X = $Script:Cursor.X + 1
+                }
+            }
+            else {
+                # EOL handling
+                if ($Script:Cursor.Y -lt $Script:Buffer.Count) {
+                    $Script:Cursor.Y = $Script:Cursor.Y + 1
+                    $Script:Cursor.X = 0
+                }
             }
         }
         Default { $null }
@@ -98,22 +132,44 @@ function Update-Input {
         }
         "Tab" {
             # Tab processing
+            $Script:Buffer[$Script:Cursor.Y] = $Script:Buffer[$Script:Cursor.Y].Insert($Script:Cursor.X, "`t")
+            Move-Cursor -direction Right
         }
         "Backspace" {
-            # In case we're on the next line
+            # Check if we're up against the line bounds
+            if ($Script:Cursor.X -le 0) {
+
+            }
+            else {
+                $Script:Buffer[$Script:Cursor.Y] = $Script:Buffer[$Script:Cursor.Y].Remove($Script:Cursor.X - 1, 1)
+                Move-Cursor -direction Left
+            }  
         }
         Default {
             # Standard Input
+            $Script:Buffer[$Script:Cursor.Y] = $Script:Buffer[$Script:Cursor.Y].Insert($Script:Cursor.X, $InputKey.KeyChar)
+            Move-Cursor -direction Right
         }
     }
 }
 
 function Sync-Console {
-    [System.Console]::Clear()
-    $Script:Buffer | ForEach-Object {
-        [System.Console]::WriteLine($_)
+    param (
+        [switch]
+        $CursorOnly
+    )
+    if ($CursorOnly) {
+        [System.Console]::SetCursorPosition($Script:Cursor.X, $Script:Cursor.Y)
     }
-    #[System.Console]::Write($Script:Buffer)
+    else {
+        # Clear the screen, write the buffer, update the cursor.
+        [System.Console]::Clear()
+        $Script:Buffer | ForEach-Object {
+            [System.Console]::WriteLine($_)
+        }
+        [System.Console]::SetCursorPosition($Script:Cursor.X, $Script:Cursor.Y)
+    }
+    
 }
 
 function Start-Edit {
@@ -133,13 +189,12 @@ function Start-Edit {
         [bool]$Finish = $false
         # Main processing loop
         do {
-            # Update the cursor
-            [System.Console]::SetCursorPosition($Script:Cursor.X, $Script:Cursor.Y)
-
             if ([System.Console]::KeyAvailable) {
 
-                # Application controls
+                # Grab console input
                 $key = [System.Console]::ReadKey()
+                
+                # Navigation controls
                 if ($key.Key -eq 'UpArrow' ) { Move-Cursor -direction Up }
                 if ($key.Key -eq 'DownArrow' ) { Move-Cursor -direction Down }
                 if ($key.Key -eq 'LeftArrow' ) { Move-Cursor -direction Left }
@@ -148,33 +203,26 @@ function Start-Edit {
                 # Save with Ctrl + C
                 if ($key.Key -eq 'C' -and $key.Modifiers -eq 'Control') {  
                     Save-Edit
-                    return 0
+                    return "Saved!"
                 }
                 
-                # Redraw after any navigation
-                Sync-Console
-                # Insert to the buffer at cursor coordinates when not using a navigation or control key
+                # Redraw cursor after any navigation
+                Sync-Console -CursorOnly
+
+                # Insert to the buffer at cursor coordinates when not using a navigation key
                 if ($key.Key -ne 'UpArrow' `
                         -and $key.Key -ne 'DownArrow' `
                         -and $key.Key -ne 'LeftArrow' `
                         -and $key.Key -ne 'RightArrow') {
                     
-                    $Script:Buffer[$Script:Cursor.Y] = $Script:Buffer[$Script:Cursor.Y].Insert($Script:Cursor.X, $key.KeyChar)
-                    
-                    # Adjust the cursor positon when characters are added and removed
-                    if ($key.Key -eq 'BackSpace') {
-                        Move-Cursor -direction Left
-                    }
-                    else {
-                        $Script:Cursor.X = $Script:Cursor.X + 1
-                        Move-Cursor -direction Right
-                    }
-                    
+                    Update-Input -InputKey $key
+                    # Redraw whole console after input
                     Sync-Console
                 }
             }
             else {
-                # We do nothing :) Only refresh the screen when a key is pressed - helps it not look so epileptic  
+                # Keep on redrawing that cursor
+                Sync-Console -CursorOnly
             }
         }while ($Finish -ne $true)
     }
@@ -182,7 +230,6 @@ function Start-Edit {
     end {
         # Reset the console
         [System.Console]::Title = "Windows PowerShell"
-        [System.Console]::Clear()
     }
 }
 
