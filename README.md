@@ -1,7 +1,5 @@
 # Get-Edit
 
----
-
 Console text editor for PowerShell
 
 A single-file script for reading and writing documents and files from within the PowerShell terminal.

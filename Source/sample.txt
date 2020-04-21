@@ -1,0 +1,8 @@
+Test String 1 is the Longest string
+Test string 2 not so long
+Test string 3 is meh
+Test string 4
+Test 
+Test
+
+Typing area [           ]
