@@ -58,7 +58,34 @@ function Move-Cursor {
     # Firstly, resync the cursor variables to the console cursor, just in case we've lost track of where we are since the last update
     $Script:Cursor.X = [System.Console]::CursorLeft
     $Script:Cursor.Y = [System.Console]::CursorTop
-    
+    $TabDetected = $false
+    $TabDistance = $null
+    $TabDirection = $null
+
+    # Line preprocessing | is there a tab to the left or the right?
+    $LineChars = ($Script:Buffer[([System.Console]::CursorTop)]).ToCharArray()
+    for ($i = 0; $i -lt $LineChars.Count; $i++) {
+        # If it's closer than 4 characters to the cursor
+        if ((($Script:Cursor.X - $i) -lt 4)) {
+            # And it's a tab
+            if ($LineChars[$i] -eq [System.ConsoleKey]::Tab) {
+                # Script: because it's a higher scope than the for loop - Sorry!
+                $Script:TabDetected = $true
+                $Script:TabDirection = "Left"
+                $Script:TabDistance = ($Script:Cursor.X - $i)
+            }
+        }
+        elseif ((($Script:Cursor.X + $i) -lt 4)) {
+            # And it's a tab
+            if ($LineChars[$i] -eq [System.ConsoleKey]::Tab) {
+                # Script: because it's a higher scope than the for loop - Sorry!
+                $Script:TabDetected = $true
+                $Script:TabDirection = "Right"
+                $Script:TabDistance = ($Script:Cursor.X + $i)
+            }
+        }
+    }
+
     # Modify the cursor, ignore if we're going to break bounds
     switch ($direction) {
         'Up' {
@@ -81,11 +108,18 @@ function Move-Cursor {
         'Left' {
             if ($Script:Cursor.X -gt 0) {
                 # Tab handling
-                if ($Script:Buffer[([System.Console]::CursorTop)][([System.Console]::CursorLeft)] -eq [System.ConsoleKey]::Tab) {
-                    $Script:Cursor.X = $Script:Cursor.X - 5
+                if ($TabDetected -and $TabDirection -eq "Left") {
+                    # We ran into a surprise tab, jump the distance
+                    $Script:Cursor.X = $Script:Cursor.X - $TabDistance
                 }
                 else {
-                    $Script:Cursor.X = $Script:Cursor.X - 1
+                    if ($Script:Buffer[([System.Console]::CursorTop)][([System.Console]::CursorLeft - 5)] -eq [System.ConsoleKey]::Tab) {
+                        $Script:Cursor.X = $Script:Cursor.X - 5
+                        Sync-Console -CursorOnly
+                    }
+                    else {
+                        $Script:Cursor.X = $Script:Cursor.X - 1
+                    }
                 }
             }
             else {
@@ -100,13 +134,19 @@ function Move-Cursor {
             # Move to the next line if we've reached the line bounds, otherwise next cursor position
             if ([System.Console]::CursorLeft -lt $Script:Buffer[([System.Console]::CursorTop)].Length) {
                 # TAB handling
-                if ($Script:Buffer[([System.Console]::CursorTop)][([System.Console]::CursorLeft)] -eq [System.ConsoleKey]::Tab) {
-                    $Script:Cursor.X = $Script:Cursor.X + 5
-                    Sync-Console -CursorOnly
+                if ($TabDetected -and $TabDirection -eq "Right") {
+                    # We ran into a surprise tab, jump the distance
+                    $Script:Cursor.X = $Script:Cursor.X + $TabDistance
                 }
                 else {
-                    $Script:Cursor.X = $Script:Cursor.X + 1
-                }
+                    if ($Script:Buffer[([System.Console]::CursorTop)][([System.Console]::CursorLeft)] -eq [System.ConsoleKey]::Tab) {
+                        $Script:Cursor.X = $Script:Cursor.X + 5
+                        Sync-Console -CursorOnly
+                    }
+                    else {
+                        $Script:Cursor.X = $Script:Cursor.X + 1
+                    }
+                }  
             }
             else {
                 # EOL handling
