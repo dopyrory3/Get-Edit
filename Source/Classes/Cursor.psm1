@@ -4,7 +4,7 @@ class Cursor {
     [int]$yPos
     [ref]$w_world
 
-    # Constructor: Creates a new MyClass object, with the specified name
+    # Constructor: Creates a new Cursor object
     Cursor(
         [int]$x,
         [int]$y
@@ -18,15 +18,6 @@ class Cursor {
     ) {
         # Set the world reference
         $this.w_world = $world
-    }
-
-    # Method: Set the cursor xPos to a given int
-    [void] SetX([int]$position) {
-        $this.xPos = $position
-    }
-    # Method: Set the cursor yPos to a given int
-    [void] SetY([int]$position) {
-        $this.yPos = $position
     }
 
     [bool] Move(
@@ -44,15 +35,19 @@ class Cursor {
                 } 
             }
             "LeftArrow" {
-                if ($this.CheckBounds("Left")) {
-                    $this.xPos -= 1
-                }
-                
+                #if ($this.CheckBounds("Left")) {
+                # Lets get our offset return position
+                $offset_translation = $this.w_world.Value.OffsetCount("Left")
+                $this.xPos -= $offset_translation
+                $this.w_world.Value.offset = $this.xPos
+                #}
             }
             "RightArrow" {
-                if ($this.CheckBounds("Right")) {
-                    $this.xPos += 1
-                }
+                #if ($this.CheckBounds("Right")) {
+                $offset_translation = $this.w_world.Value.OffsetCount("Right")
+                $this.xPos += $offset_translation
+                $this.w_world.Value.offset = $this.xPos
+                #}
             }
         }
         return $true
@@ -84,6 +79,6 @@ class Cursor {
                 }
             }
         }
-        return $result
+        return $true
     }
 }

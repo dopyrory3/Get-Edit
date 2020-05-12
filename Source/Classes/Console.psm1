@@ -41,9 +41,10 @@ class ConsoleManager {
         [System.Console]::CursorTop = 1
         [System.Console]::CursorLeft = 0
 
-        # Loop through every buffer & write the content to the screen
-        foreach ($buffer in $this.w_World.Value.Buffer_Chain) {
-            [System.Console]::Write($buffer)
+        # Loop through the buffer & calculate how to write the content to the screen
+        foreach ($char in $this.w_World.Value.Buffer) {
+            [System.Console]::Write($char.content)
+            [System.Console]::Write([char]10)
         }
     }
 
@@ -65,7 +66,7 @@ class ConsoleManager {
         # Reset
         [System.Console]::BackgroundColor = $oldColour
         [System.Console]::CursorLeft = $this.w_World.Value.w_Cursor.Value.xPos
-        [System.Console]::CursorTop = $this.w_World.Value.w_Cursor.Value.xPos
+        [System.Console]::CursorTop = $this.w_World.Value.w_Cursor.Value.yPos
     }
 
     # Method: Syncs the position of the cursor & changed objects

@@ -1,10 +1,9 @@
-using module .\Buffer.psm1
+using module .\Line.psm1
 
 class World {
     # Properties
-    #[Buffer[]]$Buffer_Chain
-    [char[]]$Buffer_Chain
-    #[Buffer]$Current_Buffer
+    [Line[]]$Buffer
+    [int]$offset
 
     [ref]$w_Console
     [ref]$w_Cursor
@@ -13,71 +12,78 @@ class World {
     World(
         [ref]$Console,
         [ref]$Cursor,
-        [char[]]$IOBuffer
+        [array]$IOBuffer
     ) {
         # Link the Console & Cursor objects
         $this.w_Console = $Console
         $this.w_Cursor = $Cursor
-        $this.Buffer_Chain = $IOBuffer
-    }
-    <#
-        #Region Build Chain
-        # First buffer is manual, empty buffer with id=0 and $null last link
-        $id_int = 0
-        $this.Buffer_Chain += [Buffer]::New(
-            $id_int,
-            $null
-        )
-        $this.Buffer_Chain[0].StartX = 0
-        $this.Buffer_Chain[0].StartY = 1
-        $this.Buffer_Chain[0].EndX = 0
-        $this.Buffer_Chain[0].EndY = 1
         
-        #region Main_Loop
+        # Build world buffer
+        $id = 0
         foreach ($line in $IOBuffer) {
-            # ID's are in HEX
-            $buffer_id = $id_int
-            # We'll give line it's own variable for continuity in the constructor?
-            $buffer_co = $line
+            # Word wrapping
+            if ($line.length -ge $this.w_Console.Value.WindowWidth) {
+                # Create the parent line & add to the buffer array
+                $parent_line = [Line]::New(
+                    $id,
+                    $line.SubString(0, $this.w_Console.Value.WindowWidth).ToCharArray()
+                )
+                $this.Buffer += $parent_line
 
-            #region LineBuffer
-            $new_buffer = [Buffer]::New(
-                $buffer_id,
-                $buffer_co
-            )
-            $this.Buffer_Chain += $new_buffer
-            #endregion
+                # How many lines need to be created
+                # Logic: Divide the remainder of the substring of the unwritten portion of the parent line by the windowwidth
+                $line_count = 0
+                $startingPos = [int]$this.w_Console.Value.WindowWidth
+                $length = [int]($line.length - $this.w_Console.Value.WindowWidth)
+                
+                $line_count = [System.Math]::DivRem(
+                    [int]$line.SubString(
+                        $startingPos,
+                        $length
+                    ).length,
+                    $this.w_Console.Value.WindowWidth,
+                    [ref]$line_count) + 1
 
-            #region NewLineBuffer
-            # Create a newline buffer object
-            $id_int += 1
-            $buffer_newline = [Buffer]::New(
-                $id_int,
-                "`n"
-            )
-            $this.Buffer_Chain += $buffer_newline
-            #endregion
+                # Create that number of virtual Lines
+                $length = $this.w_Console.Value.WindowWidth
+                $start_point = $length
+                for ($v_line = 0; $v_line -lt $line_count; $v_line++) {
+                    $id += 1
 
-            # Final counter increment.
-            $id_int += 1
+                    # If the line cut off is smaller than the starting point + buffer width, select only the line remainder
+                    if ($start_point + $length -gt $line.length) {
+                        $length = $line.length - $start_point
+                    }
+
+                    # Create a new virtual line
+                    $this.Buffer += [Line]::New(
+                        $id,
+                        $line.SubString($start_point, $length).ToCharArray(),
+                        $true,
+                        $parent_line.id
+                    )
+                    $start_point += $length
+                }
+            }
+            # Create a normal line
+            else {
+                $this.Buffer += [Line]::New(
+                    $id,
+                    $line.ToCharArray()
+                )
+            }
+            $id += 1
         }
-        #endregion
 
-        #region Linking_Pass
-        for ($count = 1; $count -lt $this.Buffer_Chain.Count; $count++) {
-            # count-1 => next_link=count // previous entry *next_link is self
-            $this.Buffer_Chain[$count - 1].SetNextLink([ref]$this.Buffer_Chain[$count])
-            # count => last_link=count-1 // self *last_link is previous entry 
-            $this.Buffer_Chain[$count].SetLastLink([ref]$this.Buffer_Chain[$count - 1])
+        $this.Buffer | % {
+            $_.Calculate_Offsets()
         }
-        #endregion
+    }
 
-        #endregion
-
-        # First non-null is where we start in the file
-        $this.Current_Buffer = $this.Buffer_Chain[1]
-        #>
-    
+    # Method: Calculates world buffer during startup
+    [void] Init() {
+        
+    }
 
     # Method: Primary controller for all console input,
     # return codes provide the key intent, which decides where it gets routed to
@@ -108,9 +114,29 @@ class World {
         return $Intent
     }
 
+    [int] OffsetCount(
+        [string]$Direction
+    ) {
+        # Establish variables
+        [int]$new_offset = 0
+        [Line]$current_line = $this.Buffer[$this.w_Cursor.Value.yPos - 1]
+
+        switch ($Direction) {
+            "Left" {
+                [int]$prev_off = $this.offset
+                $new_offset = $current_line.offsets.$prev_off
+            }
+            "Right" {
+                [int]$next_off = $this.offset
+                $new_offset = $current_line.offsets.$next_off
+            }
+        }
+        return $new_offset
+    }
+
     # Method: Return the contents of the modified buffer chain for saving
     [char[]] Chain() {
-        return $this.Buffer_Chain
+        return $this.Buffer
     }
 
     # Method: Return the state of the current world for another session

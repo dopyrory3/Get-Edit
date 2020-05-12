@@ -36,8 +36,7 @@ function Get-Edit {
                 # Read that file into the IO Buffer array
                 $Reader = New-Object System.IO.StreamReader -Arg $FQFilePath
                 while ($null -ne ($line = $Reader.ReadLine())) {
-                    $Script:IOBuffer += $line.ToCharArray()
-                    $Script:IOBuffer += [char]10
+                    $Script:IOBuffer += $line
                 }
                 $Reader.close()
             }
@@ -64,24 +63,39 @@ function Get-Edit {
         $_Console = [ConsoleManager]::New($Script:FriendlyName)
         $_Cursor = [Cursor]::New(0, 1)
 
-        # Create a new world instance, passing in the file content, then perform chain_init
-        $_World = [World]::New(
-            $_Console,
-            $_Cursor,
-            $Script:IOBuffer
-        )
+        # Create a new world instance, passing in the file content
+        try {
+            $_World = [World]::New(
+                $_Console,
+                $_Cursor,
+                $Script:IOBuffer
+            )
+        }
+        catch {
+            Write-Error "Fatal Error creating world instance"
+            exit
+        }
+        
 
         # Initialise the console, then the cursor, passing the world context, and perform first draw
-        $_Console.Init(
-            $_World
-        )
-        $_Cursor.Init(
-            $_World
-        )
+        try {
+            $_Console.Init(
+                $_World
+            )
+            $_Cursor.Init(
+                $_World
+            )
+        }
+        catch {
+            Write-Error "Could not initialise dependency classes"
+            exit
+        }
 
+        # Draw the screen & UI
+        
         $_Console.Draw()
         $_Console.DrawUI($TitleBar)
-        $_Console.DrawUI($Debug)
+
         #endregion
 
         #region Main application loop
@@ -91,10 +105,6 @@ function Get-Edit {
                 # Get input from the console manager
                 $InputKey = $_Console.GetKeyPress()
 
-                if ($InputKey.Key -eq "C" -and $InputKey.Modifiers -eq "Control") {
-                    exit
-                }
-
                 # Send it to the world for processing
                 $KeyIntent = $_World.Input($InputKey)
             
@@ -103,17 +113,21 @@ function Get-Edit {
                     "Navigate" {
                         # Sync the console once input has been processed
                         if ($_Cursor.Move($InputKey.Key)) {
+
+                            # Also redraw the UI elements
                             $_Console.DrawUI($TitleBar)
                             $_Console.DrawUI([UI]::New(
                                     "DebugPane",
                                     100,
                                     30,
-                                    ("Cursor: {0},{1}" -f `
+                                    ("Cursor: {0},{1} | Offset: {2}" -f `
                                             $_World.w_Cursor.Value.xPos, `
-                                            $_World.w_Cursor.Value.xPos),
+                                            $_World.w_Cursor.Value.yPos, `
+                                            $_World.offset),
                                     [System.ConsoleColor]::Blue
                                 ))
                             $_Console.Sync()
+                            
                         }
                     }
                     "Save" {
@@ -125,9 +139,6 @@ function Get-Edit {
                     "Quit" {
                         # End the drawing loop
                         $running = $false
-                    }
-                    default {
-
                     }
                 }
             }
@@ -148,6 +159,6 @@ function Get-Edit {
         $Script:FriendlyName = "Get-Edit Text Editor"
 
         # DEBUG - return the buffer chain
-        $_World.Buffer_Chain
+        return $_World.Buffer
     }
 }
