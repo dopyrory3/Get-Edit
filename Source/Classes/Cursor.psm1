@@ -25,17 +25,17 @@ class Cursor {
     ) {
         switch ($Direction) {
             "UpArrow" {
-                if ($this.CheckBounds("Up")) {
+                if ($this.yPos - 1 -ne 0) {
                     $this.yPos -= 1
                 }
             }
             "DownArrow" {
-                if ($this.CheckBounds("Down")) {
+                if ($this.yPos + 1 -lt $this.w_world.Value.w_Console.Value.WindowHeight) {
                     $this.yPos += 1
                 } 
             }
             "LeftArrow" {
-                if ($this.CheckBounds("Left")) {
+                if ($this.xPos -ge 0) {
                     # Lets get our offset return position
                     $offset_translation = $this.w_world.Value.OffsetCount("Left")
                     $this.xPos = $offset_translation
@@ -43,39 +43,10 @@ class Cursor {
                 }
             }
             "RightArrow" {
-                if ($this.CheckBounds("Right")) {
+                if ($this.xPos + 1 -le $this.w_world.Value.w_Console.Value.WindowWidth) {
                     $offset_translation = $this.w_world.Value.OffsetCount("Right")
                     $this.xPos = $offset_translation
                     $this.w_world.Value.w_Console.Value.Sync($true)
-                }
-            }
-        }
-        return $true
-    }
-
-    [bool] CheckBounds(
-        [string]$Direction
-    ) {
-        $result = $false
-        switch ($Direction) {
-            "Up" {
-                if ($this.yPos - 1 -ne 0) {
-                    return $true
-                }
-            }
-            "Down" {
-                if ( $this.yPos + 1 -lt $this.w_world.Value.w_Console.Value.WindowHeight) {
-                    return $true
-                }
-            }
-            "Left" {
-                if ($this.xPos -ge 0) {
-                    return $true
-                }
-            }
-            "Right" {
-                if ($this.xPos + 1 -lt $this.w_world.Value.w_Console.Value.WindowWidth) {
-                    return $true
                 }
             }
         }
