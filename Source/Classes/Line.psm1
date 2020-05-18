@@ -36,7 +36,7 @@ class Line {
     ) {
         $r_index = 0
 
-        if ($index -le $this.content.Length) {
+        if ($index -le $this.content.Length -and $index -ne 0) {
             # Sum the sizes of tabs & regular characters until we reach $index
             $x = 0
             do {
@@ -50,8 +50,8 @@ class Line {
             }until($x -eq $index)
         }
         else {
-            # Return -1 to indicate bigger index than line
-            $r_index = -1
+            # Return 0 for no change, not happening if we're indexing OOB or to 0
+            $r_index = 0
         }
 
         return $r_index

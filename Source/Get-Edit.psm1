@@ -57,16 +57,15 @@ function Get-Edit {
         try {
             $_World = [World]::New(
                 $_Console,
-                $_Cursor,
-                $Script:IOBuffer
+                $_Cursor
             )
+            $_World.Init($Script:IOBuffer)
         }
         catch {
             Write-Error "Fatal Error creating world instance"
             exit
         }
         
-
         # Initialise the console, then the cursor, passing the world context, and perform first draw
         try {
             $_Console.Init(
@@ -104,12 +103,10 @@ function Get-Edit {
             [System.ConsoleColor]::Blue
         )
         #>
-
-        $_Console.AddUI($TitleBar)
-
         #endregion
 
         # Draw the screen & UI
+        $_Console.AddUI($TitleBar)
         $_Console.Draw()
         #endregion
     }

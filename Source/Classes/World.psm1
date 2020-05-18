@@ -11,13 +11,17 @@ class World {
     # Constructor: Creates a new World object, given a console, cursor, and IO Buffer
     World(
         [ref]$Console,
-        [ref]$Cursor,
-        [array]$IOBuffer
+        [ref]$Cursor
     ) {
         # Link the Console & Cursor objects
         $this.w_Console = $Console
         $this.w_Cursor = $Cursor
-        
+    }
+
+    # Method: Calculates world buffer during startup
+    [void] Init(
+        [array]$IOBuffer
+    ) {
         # Build world buffer
         $id = 0
         foreach ($line in $IOBuffer) {
@@ -76,11 +80,6 @@ class World {
         }
     }
 
-    # Method: Calculates world buffer during startup
-    [void] Init() {
-        
-    }
-
     # Method: Primary controller for all console input,
     # return codes provide the key intent, which decides where it gets routed to
     [string] Input(
@@ -113,43 +112,43 @@ class World {
     [int] OffsetCount(
         [string]$Direction
     ) {
-        [int]$new_offset = 0
-        [Line]$current_line = $this.Buffer[$this.w_Cursor.Value.yPos - 1]
+        $Cursor = $this.w_Cursor.Value
+        [int]$new_offset = $Cursor.xPos
+        [Line]$current_line = $this.Buffer[$Cursor.yPos - 1]
+        
 
         if ($Direction -eq "Right") {
             if ($this.offset -lt $current_line.content.Length) {
-                for ($x = 0; $x -lt $this.offset + 1; $x++) {
-                    if ([byte]$current_line.content[$x] -eq 9) {
-                        $new_offset += 5
-                    }
-                    else {
-                        $new_offset += 1
-                    }
-                }
+                # Increment the offset & get the new xPos
                 $this.offset += 1
+                $new_offset = $current_line.GetOffsetOfIndex($this.offset)
             }
             else {
-                $this.w_Cursor.Value.xPos = 0
-                $this.w_Cursor.Value.yPos += 1
-                $this.offset = 0
+                # Move the cursor down a line & reset offset to 0
+                if ($Cursor.yPos + 1 -ne $this.Buffer.Count + 1) {
+                    # Never go below the buffer
+                    $Cursor.xPos = 0
+                    $Cursor.yPos += 1
+                    $this.offset = 0
+                    $new_offset = 0
+                }
             }
         }
         else {
             if ($this.offset -gt 0) {
-                for ($x = 0; $x -lt $this.offset - 1; $x++) {
-                    if ([byte]$current_line.content[$x] -eq 9) {
-                        $new_offset += 5
-                    }
-                    else {
-                        $new_offset += 1
-                    }
-                }
+                # Decrement the offset & get the new xPos
                 $this.offset -= 1
+                $new_offset = $current_line.GetOffsetOfIndex($this.offset)
             }
             else {
-                $this.w_Cursor.Value.yPos -= 1
-                $new_offset = $this.Buffer[$this.Buffer.IndexOf($current_line) - 1].content.length
-                $this.offset = $this.Buffer[$this.Buffer.IndexOf($current_line) - 1].content.length
+                # Move the cursor up a line
+                if ($Cursor.yPos - 1 -ne 0) {
+                    # Never reach the top line
+                    $Cursor.yPos -= 1
+                    $last_line = $this.Buffer[$Cursor.yPos - 1]
+                    $new_offset = $last_line.GetOffsetOfIndex($last_line.content.Length) # Cursor offset becomes size of line
+                    $this.offset = $last_line.content.Length # World offset becomes lengh of line 
+                } 
             } 
         }
         return $new_offset
