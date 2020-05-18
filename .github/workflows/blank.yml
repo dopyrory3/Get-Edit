@@ -24,7 +24,7 @@ jobs:
 
     # Runs a single command using the runners shell
     - name: Run Line Unit tests
-      run: call .\Source\UnitTests\line_units.ps1
+      run: .\Source\UnitTests\line_units.ps1
 
     # Runs a set of commands using the runners shell
     #- name: Run a multi-line script
