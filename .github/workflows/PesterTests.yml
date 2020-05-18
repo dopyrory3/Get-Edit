@@ -28,12 +28,11 @@ jobs:
       
     - name: Run Line Unit tests
       run: |
-          cd .\Source\UnitTests
-          using module ..\Classes\World.psm1
-          using module ..\Classes\Console.psm1
-          using module ..\Classes\Cursor.psm1
-          using module ..\Classes\UI.psm1
-          using module ..\Classes\Line.psm1
+          using module .\Source\Classes\World.psm1
+          using module .\Source\Classes\Console.psm1
+          using module .\Source\Classes\Cursor.psm1
+          using module .\Source\Classes\UI.psm1
+          using module .\Source\Classes\Line.psm1
           
           .\Source\UnitTests\line_units.ps1
 
