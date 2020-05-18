@@ -44,7 +44,7 @@ class ConsoleManager {
         return [System.Console]::ReadKey()
     }
 
-    # Method: Draws the contents of the world buffer chain
+    # Method: Performs first draw of the contents of the world buffer chain
     [void] Draw() {
         # Set cursor below title line
         [System.Console]::CursorTop = 1
@@ -68,7 +68,7 @@ class ConsoleManager {
         # Load any first draw/refresh UI's
         foreach ($UI in $this.ConsoleUI | Where-Object { $_.SyncTime -eq "Draw" -or $_.SyncTime -eq "Refresh" }) {
             $console_colour = [System.Console]::BackgroundColor
-            
+
             $this.ConsoleCursor = [System.Management.Automation.Host.Coordinates]::new(
                 $UI.xPos,
                 $UI.yPos)
@@ -81,27 +81,6 @@ class ConsoleManager {
 
             $this.Sync($true)
         }
-    }
-
-    # Method: Draws the UI from the world config
-    [void] DrawUI(
-        [ref]$UIObject
-    ) {
-        # Store the colour state variable for later
-        $oldColour = [System.Console]::BackgroundColor
-
-        # Set the console values
-        [System.Console]::CursorLeft = $UIObject.Value.xPos
-        [System.Console]::CursorTop = $UIObject.Value.yPos
-        [System.Console]::BackgroundColor = [System.ConsoleColor]::Blue
-
-        # Draw
-        [System.Console]::Write($UIObject.Value.content)
-
-        # Reset
-        [System.Console]::BackgroundColor = $oldColour
-        [System.Console]::CursorLeft = $this.w_World.Value.w_Cursor.Value.xPos
-        [System.Console]::CursorTop = $this.w_World.Value.w_Cursor.Value.yPos
     }
 
     # Method: Syncs the position of the cursor & changed objects

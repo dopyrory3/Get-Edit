@@ -23,6 +23,9 @@ class Cursor {
     [bool] Move(
         [ConsoleKey]$Direction
     ) {
+        $Console = $this.w_world.Value.w_Console.Value
+        $World = $this.w_world.Value
+
         switch ($Direction) {
             "UpArrow" {
                 if ($this.yPos - 1 -ne 0) {
@@ -30,23 +33,23 @@ class Cursor {
                 }
             }
             "DownArrow" {
-                if ($this.yPos + 1 -lt $this.w_world.Value.w_Console.Value.WindowHeight) {
+                if ($this.yPos + 1 -lt $Console.WindowHeight) {
                     $this.yPos += 1
                 } 
             }
             "LeftArrow" {
                 if ($this.xPos -ge 0) {
                     # Lets get our offset return position
-                    $offset_translation = $this.w_world.Value.OffsetCount("Left")
+                    $offset_translation = $World.OffsetCount("Left")
                     $this.xPos = $offset_translation
-                    $this.w_world.Value.w_Console.Value.Sync($true)
+                    $Console.Sync($true)
                 }
             }
             "RightArrow" {
-                if ($this.xPos + 1 -le $this.w_world.Value.w_Console.Value.WindowWidth) {
-                    $offset_translation = $this.w_world.Value.OffsetCount("Right")
+                if ($this.xPos + 1 -le $Console.WindowWidth) {
+                    $offset_translation = $World.OffsetCount("Right")
                     $this.xPos = $offset_translation
-                    $this.w_world.Value.w_Console.Value.Sync($true)
+                    $Console.Sync($true)
                 }
             }
         }
