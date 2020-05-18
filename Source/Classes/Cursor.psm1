@@ -35,19 +35,19 @@ class Cursor {
                 } 
             }
             "LeftArrow" {
-                #if ($this.CheckBounds("Left")) {
-                # Lets get our offset return position
-                $offset_translation = $this.w_world.Value.OffsetCount("Left")
-                $this.xPos -= $offset_translation
-                $this.w_world.Value.offset = $this.xPos
-                #}
+                if ($this.CheckBounds("Left")) {
+                    # Lets get our offset return position
+                    $offset_translation = $this.w_world.Value.OffsetCount("Left")
+                    $this.xPos = $offset_translation
+                    $this.w_world.Value.w_Console.Value.Sync($true)
+                }
             }
             "RightArrow" {
-                #if ($this.CheckBounds("Right")) {
-                $offset_translation = $this.w_world.Value.OffsetCount("Right")
-                $this.xPos += $offset_translation
-                $this.w_world.Value.offset = $this.xPos
-                #}
+                if ($this.CheckBounds("Right")) {
+                    $offset_translation = $this.w_world.Value.OffsetCount("Right")
+                    $this.xPos = $offset_translation
+                    $this.w_world.Value.w_Console.Value.Sync($true)
+                }
             }
         }
         return $true
@@ -69,7 +69,7 @@ class Cursor {
                 }
             }
             "Left" {
-                if ($this.xPos - 1 -ge 0) {
+                if ($this.xPos -ge 0) {
                     return $true
                 }
             }

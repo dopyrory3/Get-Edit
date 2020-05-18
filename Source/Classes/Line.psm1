@@ -48,16 +48,3 @@ class Line {
         $this.offsets = $line_offsets
     }
 }
-
-<# 
-===debug testing later on===
-
-foreach ($char in $buffer[7].content) {
-                $index = $buffer[7].content.IndexOf($char) #(<- doesn't matter which char it matches in the table becuase we only need the offset distance) 
-                $String = "Char: {0} | Byte: {1} | Offset: {2}" -f `
-                    $char, `
-                    [byte]$char, `
-                ($buffer[7].offsets.[int]$index)
-                Write-Host $String
-            }
-#>

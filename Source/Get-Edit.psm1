@@ -47,19 +47,9 @@ function Get-Edit {
         }
         #endregion
 
-        #region UIDefinition
-        $TitleBar = [UI]::New(
-            "Title",
-            0,
-            0,
-            ("Get-Edit | {0}" -f $Script:FriendlyName),
-            [System.ConsoleColor]::Blue
-        )
-        #endregion
-    }
-    process {
         #region Init
         # Create Cursor and Console manager context
+
         $_Console = [ConsoleManager]::New($Script:FriendlyName)
         $_Cursor = [Cursor]::New(0, 1)
 
@@ -91,13 +81,39 @@ function Get-Edit {
             exit
         }
 
-        # Draw the screen & UI
-        
-        $_Console.Draw()
-        $_Console.DrawUI($TitleBar)
+        #region UIDefinition
+        $TitleBar = [UI]::New(
+            "Draw",
+            "Wide",
+            0,
+            0,
+            ("Get-Edit | {0}" -f $Script:FriendlyName),
+            [System.ConsoleColor]::Blue
+        )
+        <#
+        $DebugPanel = [UI]::New(
+            "Refresh",
+            "Wide",
+            100,
+            30,
+            ("Cursor: {0},{1} | Offset: {2} | WindowHeight: {3}" -f `
+                    $_World.w_Cursor.Value.xPos, `
+                    $_World.w_Cursor.Value.yPos, `
+                    $_World.offset, `
+                    $_Console.WindowHeight),
+            [System.ConsoleColor]::Blue
+        )
+        #>
+
+        $_Console.AddUI($TitleBar)
 
         #endregion
 
+        # Draw the screen & UI
+        $_Console.Draw()
+        #endregion
+    }
+    process {
         #region Main application loop
         [bool]$running = $true
         do {
@@ -113,21 +129,7 @@ function Get-Edit {
                     "Navigate" {
                         # Sync the console once input has been processed
                         if ($_Cursor.Move($InputKey.Key)) {
-
-                            # Also redraw the UI elements
-                            $_Console.DrawUI($TitleBar)
-                            $_Console.DrawUI([UI]::New(
-                                    "DebugPane",
-                                    100,
-                                    30,
-                                    ("Cursor: {0},{1} | Offset: {2}" -f `
-                                            $_World.w_Cursor.Value.xPos, `
-                                            $_World.w_Cursor.Value.yPos, `
-                                            $_World.offset),
-                                    [System.ConsoleColor]::Blue
-                                ))
-                            $_Console.Sync()
-                            
+                            $_Console.Sync($true)
                         }
                     }
                     "Save" {
@@ -144,7 +146,7 @@ function Get-Edit {
             }
             else {
                 # Update console changes
-                $_Console.Sync()
+                $_Console.Sync($true)
             }
         } while ($running)
         #endregion
@@ -157,8 +159,12 @@ function Get-Edit {
         # Reset Script scope variables
         $Script:IOBuffer = @()
         $Script:FriendlyName = "Get-Edit Text Editor"
-
-        # DEBUG - return the buffer chain
-        return $_World.Buffer
+        
+        Remove-Variable -Name @(
+            "_World",
+            "_Console",
+            "_Cursor",
+            "InputObject"
+        ) -Force
     }
 }

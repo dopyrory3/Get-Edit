@@ -1,6 +1,7 @@
 class UI {
     # UI Datatype
-    [String] $Name
+    [string]$SyncTime
+    [string]$fill
     [int]$xPos
     [int]$yPos
     [char[]]$content
@@ -8,13 +9,15 @@ class UI {
 
     # Constructor: Creates a new UI object
     UI(
-        [String]$NewName,
+        [string]$SyncTime,
+        [string]$fill,
         [int]$xPos,
         [int]$yPos,
         [char[]]$content,
         [System.ConsoleColor]$BackGround
     ) {
-        $this.Name = $NewName
+        $this.SyncTime = $SyncTime
+        $this.fill = $fill
         $this.xPos = $xPos
         $this.yPos = $yPos
         $this.content = $content

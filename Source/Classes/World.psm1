@@ -117,19 +117,44 @@ class World {
     [int] OffsetCount(
         [string]$Direction
     ) {
-        # Establish variables
         [int]$new_offset = 0
         [Line]$current_line = $this.Buffer[$this.w_Cursor.Value.yPos - 1]
 
-        switch ($Direction) {
-            "Left" {
-                [int]$prev_off = $this.offset
-                $new_offset = $current_line.offsets.$prev_off
+        if ($Direction -eq "Right") {
+            if ($this.offset -lt $current_line.content.Length) {
+                for ($x = 0; $x -lt $this.offset + 1; $x++) {
+                    if ([byte]$current_line.content[$x] -eq 9) {
+                        $new_offset += 5
+                    }
+                    else {
+                        $new_offset += 1
+                    }
+                }
+                $this.offset += 1
             }
-            "Right" {
-                [int]$next_off = $this.offset
-                $new_offset = $current_line.offsets.$next_off
+            else {
+                $this.w_Cursor.Value.xPos = 0
+                $this.w_Cursor.Value.yPos += 1
+                $this.offset = 0
             }
+        }
+        else {
+            if ($this.offset -gt 0) {
+                for ($x = 0; $x -lt $this.offset - 1; $x++) {
+                    if ([byte]$current_line.content[$x] -eq 9) {
+                        $new_offset += 5
+                    }
+                    else {
+                        $new_offset += 1
+                    }
+                }
+                $this.offset -= 1
+            }
+            else {
+                $this.w_Cursor.Value.yPos -= 1
+                $new_offset = $this.Buffer[$this.Buffer.IndexOf($current_line) - 1].content.length
+                $this.offset = $this.Buffer[$this.Buffer.IndexOf($current_line) - 1].content.length
+            } 
         }
         return $new_offset
     }
