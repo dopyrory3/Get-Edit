@@ -74,10 +74,6 @@ class World {
             }
             $id += 1
         }
-
-        $this.Buffer | % {
-            $_.Calculate_Offsets()
-        }
     }
 
     # Method: Calculates world buffer during startup

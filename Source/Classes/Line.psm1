@@ -2,7 +2,6 @@ class Line {
     # Properties
     [int]$id
     [char[]]$content
-    [hashtable]$offsets
 
     [bool]$virtual
     [int]$parent = $null
@@ -30,21 +29,36 @@ class Line {
         $this.parent = $parent
     }
 
-    # Method: Calculates the offset of every character in the line, mainly put this here to deal with tabs
-    [void] Calculate_Offsets() {
-        # Calculate line-offset hashtable
-        $line_offsets = @{ }
-        for ($counter = 0; $counter -lt $this.content.Length + 1 ; $counter++) {
-            $size = 0
+    # Method: Returns an X Coordinate position int value for a given index,
+    # in the current line
+    [int] GetOffsetOfIndex(
+        [int]$index
+    ) {
+        $r_index = 0
 
-            if ( [byte]$this.content[$counter] -eq 9) { $size = 5 }         # TAB is 5 spaces
-            #elseif ( [byte]$this.content[$counter] -eq 10) { $size = -1 }   # LF is -1 EOL
-            #elseif ( [byte]$this.content[$counter] -eq 13) { $size = -1 }   # CR is -1 EOL
-            else { $size = 1 }
-
-            # Add the offset of the next char to 
-            $line_offsets.Add($counter, $size)
+        if ($index -le $this.content.Length) {
+            # Sum the sizes of tabs & regular characters until we reach $index
+            $x = 0
+            do {
+                if ([byte]$this.content[$x] -eq 9) {
+                    $r_index += 5
+                }
+                else {
+                    $r_index += 1
+                }
+                $x += 1
+            }until($x -eq $index)
         }
-        $this.offsets = $line_offsets
+        else {
+            # Return -1 to indicate bigger index than line
+            $r_index = -1
+        }
+
+        return $r_index
+    }
+
+    # Method: Returns a string JSON representation of the line object
+    [string] Serialise() {
+        return ($this | ConvertTo-Json -Depth 10 -Compress)
     }
 }
