@@ -28,12 +28,6 @@ jobs:
       
     - name: Run Line Unit tests
       run: |
-          using module .\Source\Classes\World.psm1
-          using module .\Source\Classes\Console.psm1
-          using module .\Source\Classes\Cursor.psm1
-          using module .\Source\Classes\UI.psm1
-          using module .\Source\Classes\Line.psm1
-          
           .\Source\UnitTests\line_units.ps1
 
     # Runs a set of commands using the runners shell
