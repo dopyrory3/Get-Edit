@@ -61,7 +61,8 @@ Describe "Validate Constructor" {
             $Sample_Text,
             $false,
             $null
-        ) | Should -BeOfType Line
+        )
+        $Parent | Should -BeOfType Line
     }
 
     # ID:       1
@@ -73,7 +74,8 @@ Describe "Validate Constructor" {
             1,
             $Sample_Tabs,
             $true,
-            0) | Should -BeOfType Line
+            0)
+        $Child | Should -BeOfType Line
     }
 }
 
