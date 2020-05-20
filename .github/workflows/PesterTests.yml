@@ -30,6 +30,9 @@ jobs:
 
       - name: World Unit tests
         run: .\Source\UnitTests\world_units.ps1
+
+      - name: Cursor Unit tests
+        run: .\Source\UnitTests\cursor_units.ps1
       # Console Units are excluded from CI/CD
       #- name: Console Unit tests
       #  run: .\Source\UnitTests\console_units.ps1

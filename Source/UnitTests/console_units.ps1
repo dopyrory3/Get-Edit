@@ -1,10 +1,6 @@
 using module ..\Classes\Console.psm1
 Import-Module Pester
 
-$Sample_World = [PSCustomObject]@{
-    Name = Value
-}
-
 Describe "Validate Constructor" {
     It "Create a new ConsoleManager object" {
         $TestConsole = [ConsoleManager]::new("TestConsole")
