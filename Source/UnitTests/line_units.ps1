@@ -62,7 +62,7 @@ Describe "Validate Constructor" {
             $false,
             $null
         )
-        $Parent | Should -BeOfType Line
+        $Parent.GetType().Name | Should -Be Line
     }
 
     # ID:       1
@@ -75,7 +75,7 @@ Describe "Validate Constructor" {
             $Sample_Tabs,
             $true,
             0)
-        $Child | Should -BeOfType Line
+        $Child.GetType().Name | Should -Be Line
     }
 }
 
