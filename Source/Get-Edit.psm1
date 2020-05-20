@@ -86,7 +86,7 @@ function Get-Edit {
             "Wide",
             0,
             0,
-            ("Get-Edit | {0}" -f $Script:FriendlyName),
+            $Script:FriendlyName,
             [System.ConsoleColor]::Blue
         )
         <#
@@ -125,9 +125,13 @@ function Get-Edit {
                 switch ($KeyIntent) {
                     "Navigate" {
                         # Sync the console once input has been processed
-                        if ($_Cursor.Move($InputKey.Key)) {
+                        if ($_Cursor.Move($InputKey)) {
                             $_Console.Sync($true)
                         }
+                    }
+                    "CtrlNavigate" {
+                        # Hold Ctrl to move to the next whitespace
+                        
                     }
                     "Save" {
 

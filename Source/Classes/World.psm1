@@ -89,21 +89,55 @@ class World {
 
         # Table of recognised nav keys & modifiers, if it isn't one of those it's input
         switch ($Key.Key) {
-            "UpArrow" { return "Navigate" }
-            "DownArrow" { return "Navigate" }
-            "LeftArrow" { return "Navigate" }
-            "RightArrow" { return "Navigate" }
+            "UpArrow" {
+                if ($Key.Modifiers -eq "Control") {
+                    $Intent = "CtrlNavigate"
+                }
+                else {
+                    $Intent = "Navigate"
+                }
+            }
+            "DownArrow" {
+                if ($Key.Modifiers -eq "Control") {
+                    $Intent = "CtrlNavigate"
+                }
+                else {
+                    $Intent = "Navigate"
+                }
+            }
+            "LeftArrow" {
+                if ($Key.Modifiers -eq "Control") {
+                    $Intent = "CtrlNavigate"
+                }
+                else {
+                    $Intent = "Navigate"
+                }
+            }
+            "RightArrow" {
+                if ($Key.Modifiers -eq "Control") {
+                    $Intent = "CtrlNavigate"
+                }
+                else {
+                    $Intent = "Navigate"
+                }
+            }
             "C" {
                 if ($Key.Modifiers -eq "Control") {
                     $Intent = "Save"
+                }
+                else {
+                    $Intent = "Edit"
                 }
             }
             "Z" {
                 if ($Key.Modifiers -eq "Control") {
                     $Intent = "Quit"
                 }
+                else {
+                    $Intent = "Edit" 
+                }
             }
-            Default { return "Edit" }
+            Default { $Intent = "Edit" }
         }
 
         return $Intent
@@ -134,7 +168,7 @@ class World {
                 }
             }
         }
-        else {
+        elseif ($Direction -eq "Left") {
             if ($this.offset -gt 0) {
                 # Decrement the offset & get the new xPos
                 $this.offset -= 1
@@ -151,6 +185,22 @@ class World {
                 } 
             } 
         }
+        elseif ($Direction -eq "Down") {
+            # Check if the current line is bigger than the last one, if so, we need the index at the end of that line
+            $current_line_index = $this.Buffer.IndexOf($current_line)
+            $next_line = $this.Buffer[$current_line_index + 1]
+
+            $line_offset = $next_line.GetOffsetOfIndex(
+                $next_line.content.Length
+            )
+
+            if ($line_offset -lt $Cursor.xPos) {
+                $next_line = $this.Buffer[$current_line_index + 1]
+                $new_offset = $next_line.GetOffsetOfIndex($next_line.content.length)
+                $this.offset = $new_offset
+            }
+        }
+        
         return $new_offset
     }
 

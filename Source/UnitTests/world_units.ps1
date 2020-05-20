@@ -30,7 +30,7 @@ $SampleKeyTests = @(
     # LeftArrow
     [System.ConsoleKeyInfo]::new([char]$null, [System.ConsoleKey]::LeftArrow, $false, $false, $false),
     # DownArrow
-    [System.ConsoleKeyInfo]::new([char]$null, [System.ConsoleKey]::RightArrow, $false, $false, $false),
+    [System.ConsoleKeyInfo]::new([char]$null, [System.ConsoleKey]::DownArrow, $false, $false, $false),
     # Any key
     [System.ConsoleKeyInfo]::new('f', [System.ConsoleKey]::F, $false, $false, $false)
 )

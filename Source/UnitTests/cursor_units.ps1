@@ -42,14 +42,20 @@ Describe "Validate Methods" {
         $Cursor.w_world.Value.w_Console.Value.title | Should -Be 'Get-Edit Unit Testing' 
     }
     
-    It "Test Move naviagation" {
+    It "Test Move navigation" {
         $Cursor = [Cursor]::New(
             0,
             0
         )
         $Cursor.Init($Sample_World)
-        $Cursor.Move([System.ConsoleKey]::DownArrow) | Should -Be $true 
-        $Cursor.Move([System.ConsoleKey]::RightArrow) | Should -Be $true
+
+        $Cursor.Move(
+            [System.ConsoleKeyInfo]::new([char]$null, [System.ConsoleKey]::DownArrow, $false, $false, $false)
+        ) | Should -Be $true 
+
+        $Cursor.Move(
+            [System.ConsoleKeyInfo]::new([char]$null, [System.ConsoleKey]::RightArrow, $false, $false, $false)
+        ) | Should -Be $true
 
         $Cursor.yPos | Should -Be 1
         $Cursor.xPos | Should -Be 1
