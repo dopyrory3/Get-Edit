@@ -25,43 +25,37 @@ class Cursor {
     ) {
         $Console = $this.w_world.Value.w_Console.Value
         $World = $this.w_world.Value
-
-        if ($Direction.Modifiers -eq "Control") {
-
-        }
-        else {
-            switch ($Direction.Key) {
-                "UpArrow" {
-                    # Check the console Bounds
-                    if ($this.yPos - 1 -ne 0) {
-                        $this.yPos -= 1
-                    }
+        switch ($Direction.Key) {
+            "UpArrow" {
+                # Check the console Bounds
+                if ($this.yPos - 1 -ne 0) {
+                    $this.yPos -= 1
                 }
-                "DownArrow" {
-                    # Check the console Bounds
-                    if ($this.yPos + 1 -lt $Console.WindowHeight) {
-                        # Also check the buffer bounds
-                        if ($this.yPos -lt $World.Buffer.Count) {
-                            $offset_translation = $World.OffsetCount("Down")
-                            $this.yPos += 1
-                            $this.xPos = $offset_translation
-                        }
-                    } 
-                }
-                "LeftArrow" {
-                    # Check the console Bounds
-                    if ($this.xPos -ge 0) {
-                        # Lets get our offset return position
-                        $offset_translation = $World.OffsetCount("Left")
+            }
+            "DownArrow" {
+                # Check the console Bounds
+                if ($this.yPos + 1 -lt $Console.WindowHeight) {
+                    # Also check the buffer bounds
+                    if ($this.yPos -lt $World.Buffer.Count) {
+                        $offset_translation = $World.OffsetCount("Down")
+                        $this.yPos += 1
                         $this.xPos = $offset_translation
                     }
+                } 
+            }
+            "LeftArrow" {
+                # Check the console Bounds
+                if ($this.xPos -ge 0) {
+                    # Lets get our offset return position
+                    $offset_translation = $World.OffsetCount("Left")
+                    $this.xPos = $offset_translation
                 }
-                "RightArrow" {
-                    # Check the console Bounds
-                    if ($this.xPos + 1 -le $Console.WindowWidth) {
-                        $offset_translation = $World.OffsetCount("Right")
-                        $this.xPos = $offset_translation
-                    }
+            }
+            "RightArrow" {
+                # Check the console Bounds
+                if ($this.xPos + 1 -le $Console.WindowWidth) {
+                    $offset_translation = $World.OffsetCount("Right")
+                    $this.xPos = $offset_translation
                 }
             }
         }

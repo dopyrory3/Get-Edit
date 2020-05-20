@@ -130,8 +130,10 @@ function Get-Edit {
                         }
                     }
                     "CtrlNavigate" {
-                        # Hold Ctrl to move to the next whitespace
-                        
+                        # Hold Ctrl to move 4 times
+                        for ($x = 0; $x -lt 5; $x++) {
+                            ($_Cursor.Move($InputKey)) | Out-Null
+                        }
                     }
                     "Save" {
 
