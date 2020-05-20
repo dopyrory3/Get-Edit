@@ -9,9 +9,11 @@ $Sample_Console = [PSCustomObject]@{
 }
 # Reference variable so the Cursor functions behave the same way
 $console_ref = [ref]$Sample_Console
+$Sample_World_Buffer = '[{"parent":0,"id":0,"content":["T","h","e"," ","Q","u","i","c","k"," ","B","r","o","w","n"," ","F","o","x"," ","J","u","m","p","s"," ","O","v","e","r"," ","t","h","e"," ","L","a","z","y"," ","D","o","g"],"virtual":false},{"parent":0,"id":1,"content":["T","h","e"," "," "," "," ","Q","u","i","c","k"," ","B","r","o","w","n"," ","F","o","x"," ","J","u","m","p","s"," ","O","v","e","r"," ","t","h","e"," ","L","a","z","y"," ","D","o","g","."," ","T","h","e"," ","Q","u","i","c","k"," ","B","r","o","w","n"," ","F","o","x"," ","J","u","m","p","s"," ","O","v","e","r"," ","t","h","e"," ","L","a","z","y"," ","D","o","g","."," ","T","e","s","t"," ","T","e"],"virtual":false},{"parent":1,"id":2,"content":["s","t"," ","g","r","e","a","t","e","r"," ","t","h","a","n"," ","1","0","0"," ","c","h","a","r","s"],"virtual":true},{"parent":0,"id":3,"content":["T","h","e"," ","Q","u","i","c","k"," ","B","r","o","w","n"," ","F","o","x"," ","J","u","m","p","s"," ","O","v","e","r"," ","t","h","e"," ","L","a","z","y"," ","D","o","g"],"virtual":false}]' | ConvertFrom-Json
 
 $Sample_World = [PSCustomObject]@{
     w_Console = $console_ref
+    Buffer    = $Sample_World_Buffer
 }
 
 $Sample_Console | Add-Member -MemberType ScriptMethod -Name 'Sync' -Force -Value { 
