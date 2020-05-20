@@ -23,4 +23,3 @@ This is a high-level roadmap of the direction that Get-Edit is going. This can c
   - Autosave
 
 ![](/images/get-edit.gif)
-
