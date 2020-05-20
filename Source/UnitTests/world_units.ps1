@@ -81,8 +81,8 @@ Describe "Init the world" {
     }
 }
 
-Describe "Test Input function" {
-    It "Test Example input objects" {
+Describe "Test Methods" {
+    It "Check the Input function with different key types" {
         # Rebuild the world
         $TestWorld = [World]::New(
             $SampleConsole,
@@ -97,5 +97,17 @@ Describe "Test Input function" {
         $TestWorld.Input($SampleKeyTests[4]) | Should -Be "Navigate"
         $TestWorld.Input($SampleKeyTests[5]) | Should -Be "Navigate"
         $TestWorld.Input($SampleKeyTests[6]) | Should -Be "Edit"
+    }
+    It "Check the OffsetCount function" {
+        # Rebuild the world
+        $TestWorld = [World]::New(
+            $SampleConsole,
+            $SampleCursor
+        )
+        # Initialise with the SampleBuffer
+        $TestWorld.Init($SampleBuffer)
+        # Test OffsetCount going right and left
+        $TestWorld.OffsetCount("Right") | Should -Be 1
+        $TestWorld.OffsetCount("Left") | Should -Be 0        
     }
 }
