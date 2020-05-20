@@ -26,9 +26,9 @@ jobs:
     - name: Get latest Pester version
       run: Install-Module Pester -Force -Verbose -Confirm:$false
       
-    - name: Run Line Unit tests
+    - name: Unit tests
       run: |
-          .\Source\UnitTests\line_units.ps1
+          .\Source\UnitTests\units.ps1
 
     # Runs a set of commands using the runners shell
     #- name: Run a multi-line script
