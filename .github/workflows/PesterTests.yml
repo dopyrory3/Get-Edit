@@ -22,9 +22,10 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
-      - name: Get latest Pester version
-        run: Install-Module Pester -Force -Verbose -Confirm:$false
+      # We don't necessarily need the latest version of Pester...
+      # It helps my account minutes to leave this out
+      #- name: Get latest Pester version
+      #  run: Install-Module Pester -Force -Verbose -Confirm:$false
 
       - name: Line Unit tests
         run: .\Source\UnitTests\line_units.ps1
