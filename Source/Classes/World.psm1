@@ -186,19 +186,32 @@ class World {
             } 
         }
         elseif ($Direction -eq "Down") {
-            # Check if the current line is bigger than the last one, if so, we need the index at the end of that line
+            
             $current_line_index = $this.Buffer.IndexOf($current_line)
             $next_line = $this.Buffer[$current_line_index + 1]
-
             $line_offset = $next_line.GetOffsetOfIndex(
                 $next_line.content.Length
             )
 
+            # Check if the current line is bigger than the last one, if so, we need the index at the end of that line
             if ($line_offset -lt $Cursor.xPos) {
-                $next_line = $this.Buffer[$current_line_index + 1]
                 $new_offset = $next_line.GetOffsetOfIndex($next_line.content.length)
                 $this.offset = $new_offset
             }
+            else {
+                # Otherwise get the offset required by that line to match the current X-Position
+                $new_index = $next_line.GetIndexOfOffset($Cursor.xPos)
+                $new_offset = $next_line.GetOffsetOfIndex($new_index)
+                $this.offset = $new_offset
+            }
+        }
+        elseif ($Direction -eq "Up") {
+            $current_line_index = $this.Buffer.IndexOf($current_line)
+            $prev_line = $this.Buffer[$current_line_index - 1]
+            
+            $new_index = $prev_line.GetIndexOfOffset($Cursor.xPos)
+            $new_offset = $prev_line.GetOffsetOfIndex($new_index)
+            $this.offset = $new_offset
         }
         
         return $new_offset
@@ -212,10 +225,10 @@ class World {
     # Method: Return the state of the current world for another session
     [psobject] Save() {
         # Create a state object of the world and all it's member properties
-        $State = New-Object -TypeName psobject
+        #$State = New-Object -TypeName psobject
         
         #TODO
 
-        return $this
+        return { }
     }
 }

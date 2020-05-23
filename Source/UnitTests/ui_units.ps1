@@ -11,5 +11,11 @@ Describe "Validate UI Struct" {
             "Get-Edit | Test",
             [System.ConsoleColor]::Blue
         )
+        $UI.SyncTime | Should -Be "Draw"
+        $UI.fill | Should -Be "Wide"
+        $UI.xPos | Should -Be 10
+        $UI.yPos | Should -Be 10
+        $UI.content | Should -Be @('G', 'e', 't', '-', 'E', 'd', 'i', 't', ' ', '|', ' ', 'T', 'e', 's', 't')
+        $UI.Background | Should -Be Blue
     }
 }

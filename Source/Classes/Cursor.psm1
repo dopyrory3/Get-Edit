@@ -29,7 +29,9 @@ class Cursor {
             "UpArrow" {
                 # Check the console Bounds
                 if ($this.yPos - 1 -ne 0) {
+                    $offset_translation = $World.OffsetCount("Up")
                     $this.yPos -= 1
+                    $this.xPos = $offset_translation
                 }
             }
             "DownArrow" {

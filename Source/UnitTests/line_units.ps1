@@ -103,6 +103,23 @@ Describe "Test Methods" {
             0).GetOffsetOfIndex(10) | Should Be 14
     }
 
+    It "Calculate the index value of offset 6 on Parent line " {
+        $Parent = [Line]::New(
+            0,
+            $Sample_Text,
+            $false,
+            $null
+        ).GetIndexOfOffset(6) | Should Be 6
+    }
+
+    It "Calculate the index value of offset 6 on Child line " {
+        $Child = [Line]::new(
+            1,
+            $Sample_Tabs,
+            $true,
+            0).GetIndexOfOffset(6) | Should Be 4
+    }
+
     It "Test Serialisation of parent line" {
         $Parent = [Line]::New(
             0,
