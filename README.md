@@ -11,7 +11,7 @@ This is a high-level roadmap of the direction that Get-Edit is going. This can c
 
 - **Remote console editing**
 
-  - Create and manage the lifecycle of PSSessions to allow for editing files on remote computers
+  - Edit files while working over interactive PSSessions on remote computers
 
 - **Graphical interface**
 
