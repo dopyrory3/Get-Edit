@@ -120,7 +120,7 @@ Describe "Test Methods" {
             0).GetIndexOfOffset(6) | Should Be 4
     }
 
-    It "Test Serialisation of parent line" {
+    It "Test Serialisation of Parent line" {
         $Parent = [Line]::New(
             0,
             $Sample_Text,
@@ -135,5 +135,24 @@ Describe "Test Methods" {
             $Sample_Tabs,
             $true,
             0).Serialise() | Should Be '{"parent":0,"id":1,"content":["T","h","e","\t","Q","u","i","c","k"," ","B","r","o","w","n","\t","F","o","x"," ","J","u","m","p","s"," ","O","v","e","r"," ","t","h","e"," ","L","a","z","y"," ","D","o","g"],"virtual":true}'
+    }
+    It "Test Insert() on Parent line" {
+        $Parent = [Line]::New(
+            0,
+            $Sample_Text,
+            $false,
+            $null
+        )
+        $Parent.Insert(3, 'y')
+        $Parent.content[3] | Should Be 'y'
+    }
+    It "Test Insert() on Child line" {
+        $Child = [Line]::new(
+            1,
+            $Sample_Tabs,
+            $true,
+            0)
+        $Child.Insert(3, 'y')
+        $Child.content[3] | Should Be 'y'
     }
 }

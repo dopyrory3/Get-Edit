@@ -92,6 +92,20 @@ class Line {
         return $r_index
     }
 
+    # Method: Does what it says on the tin
+    [void] Insert(
+        [int]$Index,
+        [char]$Char
+    ) {
+
+        # I made a long function for this that built a new char[] and it was very clever but later discovered
+        # it's quicker to cast to a new string type then call string.Insert() and cast back to a char[]... 
+        # Still tender about that one. 1+ days wasted trying to be intelligent
+        $str = [string]::new($this.content)
+        $str = $str.Insert($Index, $Char)
+        $this.content = $str.ToCharArray()
+    }
+
     # Method: Returns a string JSON representation of the line object
     [string] Serialise() {
         return ($this | ConvertTo-Json -Depth 10 -Compress)
