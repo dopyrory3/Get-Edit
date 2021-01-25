@@ -80,6 +80,11 @@ class World {
         }
     }
 
+    # Method: 
+    [void] Shift() {
+
+    }
+
     # Method: Primary controller for all console input,
     # return codes provide the key intent, which decides where it gets routed to
     [string] Input(
